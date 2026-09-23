@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FindIt — Lost & Found System</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div onclick="showPage('home')"  class="logo">Find<span>It</span></div>
+  <div class="nav-links">
+    <a onclick="showPage('home')" class="active" id="nav-home">Browse</a>
+    <a onclick="showPage('report')" id="nav-report">Report Item</a>
+    <a onclick="showPage('admin')" id="nav-admin">Admin</a>
+    <button class="btn btn-outline btn-sm" onclick="showPage('auth')" id="loginBtn">Login</button>
+    <button class="btn btn-primary btn-sm" onclick="openReportPage()" style="display:none" id="logoutBtn">+ Report</button>
+    <!-- <button class="btn btn-primary btn-sm" onclick="showPage('report')" style="display:none" id="logoutBtn">+ Report</button> -->
+  </div>
+</nav>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modalBox">
+    <h3 id="modalTitle">Contact Reporter</h3>
+    <p id="modalBody">You can reach out to the person who reported this item.</p>
+    <div class="modal-footer">
+      <button class="btn btn-primary" onclick="closeModal()">Send Message</button>
+      <button class="btn btn-outline" onclick="closeModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- HOME PAGE -->
+<div class="page active" id="page-home">
+  <div class="hero">
+    <h1>Find What You've <em>Lost.</em><br>Return What You've Found.</h1>
+    <p>A community-powered lost and found platform for your campus. Post, search, and reconnect with your belongings.</p>
+    <div class="hero-btns">
+      <button class="btn btn-lost" onclick="openReport('lost')">🔍 I Lost Something</button>
+      <button class="btn btn-found" onclick="openReport('found')">📦 I Found Something</button>
+    </div>
+  </div>
+  <div class="stats-bar">
+    <div class="stat"><div class="stat-num" id="s-total">0</div><div class="stat-label">Total Reports</div></div>
+    <div class="stat"><div class="stat-num" id="s-matched">0</div><div class="stat-label">Items Matched</div></div>
+    <div class="stat"><div class="stat-num" id="s-lost">0</div><div class="stat-label">Items Lost</div></div>
+    <div class="stat"><div class="stat-num" id="s-found">0</div><div class="stat-label">Items Found</div></div>
+  </div>
+  <div class="search-section">
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="Search for wallet, phone, keys, bag..." oninput="filterItems()">
+      <button class="btn btn-primary" onclick="filterItems()">Search</button>
+    </div>
+    <div class="filters">
+      <button class="filter-chip active" onclick="setFilter(this,'all')">All Items</button>
+      <button class="filter-chip" onclick="setFilter(this,'lost')">🔴 Lost</button>
+      <button class="filter-chip" onclick="setFilter(this,'found')">🟢 Found</button>
+      <button class="filter-chip" onclick="setFilter(this,'electronics')">Electronics</button>
+      <button class="filter-chip" onclick="setFilter(this,'bags')">Bags</button>
+      <button class="filter-chip" onclick="setFilter(this,'keys')">Keys</button>
+      <button class="filter-chip" onclick="setFilter(this,'documents')">Documents</button>
+    </div>
+  </div>
+  <div class="items-grid" id="itemsGrid"></div>
+</div>
+
+<!-- REPORT PAGE -->
+<div class="page" id="page-report">
+  <div class="form-container">
+    <h2>Report an Item</h2>
+    <p>Fill in the details below. The more info you provide, the higher the chance of a match.</p>
+    <div class="type-select">
+      <div class="type-opt lost-opt selected" id="type-lost" onclick="selectType('lost')">
+        <span class="type-icon">😔</span>
+        <div class="type-label">I Lost It</div>
+        <div class="type-sub">Report something you lost</div>
+      </div>
+      <div class="type-opt found-opt" id="type-found" onclick="selectType('found')">
+        <span class="type-icon">🎉</span>
+        <div class="type-label">I Found It</div>
+        <div class="type-sub">Report something you found</div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Item Name *</label>
+      <input type="text" id="f-name" placeholder="e.g. Blue Nike Backpack">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Category *</label>
+        <select id="f-category">
+          <option value="">Select category</option>
+          <option>Electronics</option>
+          <option>Bags</option>
+          <option>Keys</option>
+          <option>Documents</option>
+          <option>Clothing</option>
+          <option>Jewelry</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Date *</label>
+        <input type="date" id="f-date">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Location *</label>
+      <input type="text" id="f-location" placeholder="e.g. Library 2nd Floor, Cafeteria entrance">
+    </div>
+    <div class="form-group">
+      <label>Description *</label>
+      <textarea id="f-desc" placeholder="Describe the item in detail — color, brand, distinguishing marks..."></textarea>
+    </div>
+    <div class="form-group">
+      <label>Photo (optional)</label>
+      <input type="file" id="f-image" accept="image/*" style="display:none" onchange="previewImage(this)">
+      <div class="upload-area" onclick="document.getElementById('f-image').click()">
+        <div class="upload-icon" id="previewIcon">📷</div>
+        <div class="upload-text" id="previewText">
+          <strong>Click to upload</strong> or drag and drop<br>PNG, JPG up to 5MB
+        </div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Your Contact (Email or Phone) *</label>
+      <input type="text" id="f-contact" placeholder="email@university.edu">
+    </div>
+    <button class="btn btn-primary form-submit" onclick="submitReport()">Submit Report</button>
+  </div>
+</div>
+
+
+<!-- AUTH PAGE -->
+<div class="page" id="page-auth">
+  <div class="auth-container">
+    <h2>Welcome back 👋</h2>
+    <p>Sign in to report items and track your listings.</p>
+    
+    <!-- Google button (demo) -->
+    <button class="social-btn" onclick="showToast('Google Sign-In coming soon!')">🔵 Continue with Google</button>
+    <div class="divider">or sign in with</div>
+
+    <div class="auth-toggle">
+      <button class="active" id="loginTab" onclick="switchAuth('login')">Login</button>
+      <button id="registerTab" onclick="switchAuth('register')">Register</button>
+    </div>
+
+    <!-- Register fields -->
+    <div id="registerFields" style="display:none">
+      <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" id="regName" placeholder="John Doe">
+      </div>
+      <div class="form-group">
+        <label>Student ID (optional)</label>
+        <input type="text" id="regStudentId" placeholder="e.g. STU-12345">
+      </div>
+    </div>
+
+    <!-- Email field (visible only on register) -->
+    <div class="form-group" id="emailGroup">
+      <label>Email Address</label>
+      <input type="email" id="authEmail" placeholder="you@university.edu">
+    </div>
+
+    <!-- Login field (visible only on login) – email OR student ID -->
+    <div class="form-group" id="loginFieldGroup" style="display:none">
+      <label>Email or Student ID</label>
+      <input type="text" id="authLogin" placeholder="you@university.edu or STU-12345">
+    </div>
+
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="authPass" placeholder="••••••••">
+    </div>
+    <button class="btn btn-primary form-submit" onclick="doAuth()">Login</button>
+  </div>
+</div>
+
+<!-- ADMIN PAGE -->
+<div class="page" id="page-admin">
+  <div class="admin-container">
+    <div class="admin-header">
+      <h2>Admin Dashboard</h2>
+      <button class="btn btn-outline" onclick="showToast('Exporting report...')">📊 Export CSV</button>
+    </div>
+    <div class="admin-stats">
+      <div class="admin-stat-card"><div class="stat-card-num" style="color:var(--lost)">0</div><div class="stat-card-label">Lost Reports</div></div>
+      <div class="admin-stat-card"><div class="stat-card-num" style="color:var(--found)">0</div><div class="stat-card-label">Found Reports</div></div>
+      <div class="admin-stat-card"><div class="stat-card-num" style="color:var(--accent)">0</div><div class="stat-card-label">Resolved</div></div>
+      <div class="admin-stat-card"><div class="stat-card-num" style="color:#a78bfa">0</div><div class="stat-card-label">Total Users</div></div>
+    </div>
+    <div class="admin-table">
+      <div class="table-header">
+        <h3>Recent Reports</h3>
+        <div style="display:flex;gap:8px">
+          <button class="filter-chip active" onclick="setAdminFilter(this,'all')">All</button>
+          <button class="filter-chip" onclick="setAdminFilter(this,'pending')">Pending</button>
+        </div>
+      </div>
+      <table>
+        <thead>
+          <tr><th>Item</th><th>Type</th><th>Location</th><th>Reporter</th><th>Date</th><th>Status</th><th>Actions</th></tr>
+        </thead>
+        <tbody id="adminTable"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<script src="script.js"></script>
+</body>
+</html>
